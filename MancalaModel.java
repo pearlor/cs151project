@@ -10,7 +10,9 @@ public class MancalaModel
 {
 	private int[][] board;
 	private int[][] before;
-	private ArrayList<ChangeListener> listeners;
+	private ArrayList<MancalaBoard> viewList;
+	
+	
 	/**
 	 * Creates a MancalaModel. The board will be 2x7 with 2 mancalas and 12 pits. 
 	 * B 6 5 4 3 2 1 
@@ -22,13 +24,15 @@ public class MancalaModel
 	{
 		board = new int[2][7]; //  2 mancalas and 12 pits
 		before = new int[2][7];
-		listeners = new ArrayList<ChangeListener>();
+		viewList = new ArrayList<>();
 		for(int i = 1; i < board[0].length; i++)
 		{
 			board[0][i] = setUpNum;
 			board[1][i] = setUpNum;
 		}
 	}
+	
+	
 	/**
 	 * Returns the array containing the pits and mancalas.
 	 * @return an array of the board containing pits and mancalas
@@ -50,6 +54,8 @@ public class MancalaModel
 		}
 		System.out.print(board[0][0]);
 	}
+	
+	
 	/**
 	 * Returns the number of stones within a specified pit or mancala.
 	 * Player A is 0, Player B is 1
@@ -66,10 +72,14 @@ public class MancalaModel
 		}
 		return board[player][pit];
 	}
+	
 	public int getBPits(int pitNum)
 	{
 		return 7 - pitNum;
 	}
+	
+	
+	
 	/**
 	 * Distributes counter-clockwise stones within the board array.
 	 *      <----
@@ -135,13 +145,15 @@ public class MancalaModel
 			stones--;			
 		}
 	}
+	
+	
 	/**
 	 * The helper method of distribute to swap side.
 	 * If side = 0, then return 1. Otherwise, return 0.
 	 * @param side the side number of which player
 	 * @return 0 or 1 depending on side's number
 	 */
-	public int changeSide(int side)
+	private int changeSide(int side)
 	{
 		if(side == 0)
 		{
@@ -149,22 +161,25 @@ public class MancalaModel
 		}
 		return 0;
 	}
-	public void acrossCapture(int sideNum, int pitNum)
+	
+	private void acrossCapture(int sideNum, int pitNum)
 	{
-		
 		int otherSide = changeSide(sideNum);
 		board[sideNum][pitNum] = board[changeSide(sideNum)][pitNum];
 		board[otherSide][pitNum] = 0;
-		
 	}
+	
+	
 	/**
 	 * Attaches listeners to model.
 	 * @param cl the ChangeListener
 	 */
-	public void attach(ChangeListener cl)
+	public void attach(MancalaBoard board)
 	{
-		listeners.add(cl);
+		viewList.add(board);
 	}
+	
+	
 	/**
 	 * Updates the number of stones in each pit in this model and notifies all listeners of changes of the number of stones.
 	 * Player A is 0, Player B is 1, and the pits are from 1-6. 
@@ -175,23 +190,27 @@ public class MancalaModel
 	{
 		before = board;
 		//distribute(player, pit); 
-		for(ChangeListener cl : listeners)
+		for(MancalaBoard board : viewList)
 		{
-			cl.stateChanged(new ChangeEvent(this));
+			board.updateGraphics();
 		}
 	}
+	
+	
 	/**
 	 * Resets the board to previous state before last change.
 	 */
 	public void undo()
 	{
 		board = before;
-		for(ChangeListener cl : listeners)
+		for(MancalaBoard board : viewList)
 		{
-			cl.stateChanged(new ChangeEvent(this));
+			board.updateGraphics();
 		}
 	}
-	public boolean gameEnded()
+	
+	
+	public boolean hasGameEnded()
 	{
 		boolean isEnded = false;
 		boolean sideAEmpty = true;
@@ -227,7 +246,9 @@ public class MancalaModel
 		}
 		return isEnded;
 	}
-	public void endCapture(int player)
+	
+	
+	private void endCapture(int player)
 	{
 		for(int i = 1; i < board[player].length; i++)
 		{
