@@ -73,6 +73,10 @@ public class MancalaBoard extends JFrame {
 				questionPanel2.add(styleB);
 				setting.add(questionPanel2, BorderLayout.CENTER);
 				
+				final ButtonGroup group = new ButtonGroup();
+				group.add(styleA);
+				group.add(styleB);
+				
 				//Save button
 				JButton button = new JButton("SAVE");
 				button.addActionListener(new ActionListener() {
