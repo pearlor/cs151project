@@ -32,13 +32,16 @@ public class MancalaComponent extends JComponent implements BoardComponent {
 		int y = ypit + 70;
 		int num = 1;
 		
-		for (int i = 1; i <= count; i++) {
-			if (num <= 6) {
+		for (int i = 1; i <= count; i++) 
+		{
+			if (num <= 6) 
+			{
 				g2.fill(new Ellipse2D.Double(x, y, 20, 20));
 				x +=22;
 				num++;
 			}
-			else {
+			if(num > 6)
+			{
 				x = xpit + 25;
 				y += 22;
 				num = 1;

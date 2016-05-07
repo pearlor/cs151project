@@ -2,19 +2,21 @@ import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
 
-public class PitButton extends JComponent implements BoardComponent {
+public class PitButton extends JComponent implements BoardComponent 
+{
 	private int count;
 	private Color color;
 	
-	public PitButton(int num) {
+	public PitButton(int num) 
+	{
 		count = num;
 	}
-	
-	public void setColor(Color newColor) {
+	public void setColor(Color newColor) 
+	{
 		color = newColor;
 	}
-	
-	public void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) 
+	{
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(Color.WHITE);
@@ -28,13 +30,17 @@ public class PitButton extends JComponent implements BoardComponent {
 		int y = 50;
 		int num = 1;
 		
-		for (int i = 1; i <= count; i++) {
-			if (num <= 4) {
+		for (int i = 1; i <= count; i++) 
+		{
+			if (num <= 4) 
+			{
 				g2.fill(new Ellipse2D.Double(x, y, 20, 20));
 				x +=22;
 				num++;
 			}
-			else {
+			
+			if(num > 4)
+			{
 				x = 10;
 				y += 22;
 				num = 1;

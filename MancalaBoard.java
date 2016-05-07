@@ -4,14 +4,16 @@ import java.io.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class MancalaBoard extends JFrame {
+public class MancalaBoard extends JFrame 
+{
 	
 	private MancalaModel model;
 	private MancalaLayoutManager layout;
 	private int width;
 	private int height;
 	
-	public MancalaBoard(MancalaModel mancala, MancalaLayoutManager newLayout, int w, int h) {
+	public MancalaBoard(MancalaModel mancala, MancalaLayoutManager newLayout, int w, int h) 
+	{
 		model = mancala;
 		layout = newLayout;
 		width = w;
@@ -19,12 +21,14 @@ public class MancalaBoard extends JFrame {
 		this.updateGraphics();
 	}
 	
-	public void setLayout(MancalaLayoutManager newLayout) {
+	public void setLayout(MancalaLayoutManager newLayout) 
+	{
 		layout = newLayout;
 		this.updateGraphics();
 	}
 
-	public void updateGraphics(){
+	public void updateGraphics()
+	{
 		this.getContentPane().removeAll();;
 		
 		int[][] board = model.getBoard();
@@ -103,9 +107,11 @@ public class MancalaBoard extends JFrame {
 		top.add(layoutButton);
 		
 		JButton undoButton = new JButton("UNDO");
-		undoButton.addActionListener(new ActionListener() {
+		undoButton.addActionListener(new ActionListener() 
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e) 
+			{
 				model.undo();
 			}
 		});
@@ -153,7 +159,8 @@ public class MancalaBoard extends JFrame {
 		pitButtonPanel.setBorder(BorderFactory.createEmptyBorder());
 		pitButtonPanel.setLayout(new FlowLayout());
 		
-		for (int i = 1; i <= 6; i++) {
+		for (int i = 1; i <= 6; i++) 
+		{
 			//Create the label
 			JLabel pitLabel = new JLabel("B" + (7 - i));
 			pitLabel.setPreferredSize(new Dimension(UNIT_WIDTH, 20));
@@ -164,12 +171,14 @@ public class MancalaBoard extends JFrame {
 			
 			final int temp = i;
 			//Create the PitButton
-			PitButton pit = new PitButton(board[1][7 - i]);
-			System.out.println(board[1][7 - i]);
+			PitButton pit = new PitButton(board[1][i]);
+			
 			pit.setPreferredSize(new Dimension(UNIT_WIDTH, UNIT_HEIGHT*4 - 70));
-			pit.addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseEvent e) {
-					model.distribute(1, temp);
+			pit.addMouseListener(new MouseAdapter() 
+			{
+				public void mouseClicked(MouseEvent e) 
+				{
+					model.update(1, (7-temp)); //since A's is reversed the selection needs to be reverted
 				}
 			});
 			layout.decorateStone(pit);
@@ -194,7 +203,8 @@ public class MancalaBoard extends JFrame {
 		pitButtonPanel.setBorder(BorderFactory.createEmptyBorder());
 		pitButtonPanel.setLayout(new FlowLayout());
 		
-		for (int i = 1; i <= 6; i++) {
+		for (int i = 1; i <= 6; i++) 
+		{
 			//Create the label
 			JLabel pitLabel = new JLabel("A" + i);
 			pitLabel.setPreferredSize(new Dimension(UNIT_WIDTH, 20));
@@ -206,11 +216,13 @@ public class MancalaBoard extends JFrame {
 			final int temp = i;
 			//Create the PitButton
 			PitButton pit = new PitButton(board[0][i]);
-			System.out.println(board[0][i]);
+			
 			pit.setPreferredSize(new Dimension(UNIT_WIDTH, UNIT_HEIGHT*4 - 70));
-			pit.addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseEvent e) {
-					model.distribute(0, temp);
+			pit.addMouseListener(new MouseAdapter() 
+			{
+				public void mouseClicked(MouseEvent e) 
+				{
+					model.update(0, temp);
 				}
 			});
 			layout.decorateStone(pit);

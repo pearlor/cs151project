@@ -12,6 +12,9 @@ public class MancalaModel
 	private int[][] before;
 	private ArrayList<MancalaBoard> viewList;
 	
+	private int whoseTurn;
+	private int prevUndoTurn;
+	private int undoCounter;
 	
 	/**
 	 * Creates a MancalaModel. The board will be 2x7 with 2 mancalas and 12 pits. 
@@ -25,10 +28,15 @@ public class MancalaModel
 		board = new int[2][7]; //  2 mancalas and 12 pits
 		before = new int[2][7];
 		viewList = new ArrayList<>();
+		whoseTurn = 0;
+		prevUndoTurn = -1;
+		undoCounter = 0;
 		for(int i = 1; i < board[0].length; i++)
 		{
 			board[0][i] = setUpNum;
 			board[1][i] = setUpNum;
+			before[0][i] = setUpNum;
+			before[1][i] = setUpNum;
 		}
 	}
 	
@@ -90,12 +98,13 @@ public class MancalaModel
 	 * @param player the current player's side number
 	 * @param startingPit the starting pit's number
 	 */
-	public void distribute(int player, int startingPit)
+	public boolean distribute(int player, int startingPit)
 	{
 		boolean isPlayerASide = true;
 		int pitToEmpty = startingPit;
 		int cSide = player; 
 		int cPit = pitToEmpty +1;
+		boolean endedInPlayer = false;
 		
 		if(player == 1) //Player's Input needs to be converted :)
 		{
@@ -109,11 +118,11 @@ public class MancalaModel
 		
 		while(stones != 0)
 		{
+			
 			if(cPit > 6 || cPit == 0) // If cPit > 6, then cPit is supposedly current side's mancala. Put a stone into mancala.
 			{
-				System.out.println("hel" + cPit + " stones " + stones);
 				board[cSide][0]++; // The mancala
-	
+				endedInPlayer = true;
 				cPit = 1;
 				
 				if(isPlayerASide)
@@ -125,9 +134,9 @@ public class MancalaModel
 			}
 			else
 			{
+				endedInPlayer = false;
 				if(cSide == player && stones == 1 && cPit != 0 && board[cSide][cPit] == 0 && board[changeSide(cSide)][cPit] > 0 )
 				{
-					System.out.println("no " + cPit);
 					acrossCapture(cSide, cPit);
 				}
 				
@@ -144,6 +153,7 @@ public class MancalaModel
 			}
 			stones--;			
 		}
+		return endedInPlayer;
 	}
 	
 	
@@ -186,14 +196,36 @@ public class MancalaModel
 	 * @param player the player's number
 	 * @param pit the pit number
 	 */
-	public void update(int player, int pit)
+	public boolean update(int player, int pit)
 	{
-		before = board;
-		//distribute(player, pit); 
-		for(MancalaBoard board : viewList)
+		if(whoseTurn == player && getStonesOf(player, pit) != 0)
 		{
-			board.updateGraphics();
+			if(prevUndoTurn == whoseTurn)
+			{
+				undoCounter = 0;
+			}
+			setStateOfBoard(before, board);
+			
+			boolean playersMancala = distribute(player, pit); 
+			if(!playersMancala)
+			{
+				whoseTurn = changeSide(whoseTurn);
+			}
+		
+			for(MancalaBoard board : viewList)
+			{
+				board.updateGraphics();
+			}
 		}
+		if(hasGameEnded())
+		{
+			for(MancalaBoard board : viewList)
+			{
+				board.updateGraphics();
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	
@@ -202,14 +234,29 @@ public class MancalaModel
 	 */
 	public void undo()
 	{
-		board = before;
-		for(MancalaBoard board : viewList)
+		if(undoCounter < 3)
 		{
-			board.updateGraphics();
+			undoCounter++;
+			prevUndoTurn = whoseTurn;
+			whoseTurn = changeSide(whoseTurn);
+			setStateOfBoard(board, before);
+			for(MancalaBoard board : viewList)
+			{
+				board.updateGraphics();
+			}
 		}
 	}
 	
-	
+	public void setStateOfBoard(int[][] boardSetAs, int[][] boardToBe)
+	{
+		for(int i = 0; i < boardSetAs.length; i++)
+		{
+			for(int j = 0; j < boardSetAs[0].length; j++)
+			{
+				boardSetAs[i][j] = boardToBe[i][j];
+			}
+		}
+	}
 	public boolean hasGameEnded()
 	{
 		boolean isEnded = false;
@@ -217,7 +264,7 @@ public class MancalaModel
 		boolean sideBEmpty = true;
 		for(int i = 1; i < board[0].length; i++) //Player A 1-6
 		{
-			if(board[0][1] != 0)
+			if(board[0][i] != 0)
 			{
 				sideAEmpty = false;
 			}
@@ -232,7 +279,7 @@ public class MancalaModel
 		{
 			for(int i = 1; i < board[1].length; i++) //Player B 6-1
 			{
-				if(board[1][1] != 0)
+				if(board[1][i] != 0)
 				{
 					sideBEmpty = false;
 				}
@@ -252,7 +299,7 @@ public class MancalaModel
 	{
 		for(int i = 1; i < board[player].length; i++)
 		{
-			board[player][0] = board[player][i]; //Player's mancala
+			board[player][0] += board[player][i]; //Player's mancala
 			board[player][i] = 0;
 		}
 	}
