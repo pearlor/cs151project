@@ -1,14 +1,22 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
- /**
-  * This class displays the menu screen that lists
-  * the options for the user to select before starting the game
-  */
-public class MancalaOptionMenu extends JFrame {
-    
-   public MancalaOptionMenu(){
+/**
+ * 
+ * @authors Ann Le, Ha Nguyen, Pearl Or
+ *
+ * This class displays the menu screen that lists
+ * the options for the user to select before starting a mancala game.
+ * After user input, this class creates the MancalaModel and MancalaBoard for the actual game.
+ *
+ */
+public class MancalaOptionMenu extends JFrame 
+{  
+	/**
+	 * Creates a MancalaOptionMenu.
+	 */
+   public MancalaOptionMenu()
+   {
 	   /*
 	   JLabel background = new JLabel(new ImageIcon(Toolkit.getDefaultToolkit().createImage("menu.png")));
 	   this.setContentPane(background);
@@ -100,11 +108,13 @@ public class MancalaOptionMenu extends JFrame {
 				   
 				   //Attach the model to the view and controller component
 				   model.attach(board);
+					
 				   
 				   //Close the menu window
 				   dispose();
 			   }
-			   else {
+			   else 
+			   {
 				   JFrame errorMessage = new JFrame();
 				   errorMessage.setTitle("Error");
 				   errorMessage.setSize(450, 100);

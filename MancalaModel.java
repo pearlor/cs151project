@@ -1,10 +1,11 @@
 import java.util.ArrayList;
-import javax.swing.event.*;
 
 /**
- * This class is the model portion of MVC pattern.
- * @author Pearl Or
- * Class creates a MancalaModel and its required methods.
+ * This class is the Model portion of MVC pattern.
+ * 
+ * @authors Ann Le, Ha Nguyen, Pearl Or
+ * 
+ * This class creates a MancalaModel and its required methods.
  */
 public class MancalaModel 
 {
@@ -12,9 +13,16 @@ public class MancalaModel
 	private int[][] before;
 	private ArrayList<MancalaBoard> viewList;
 	
+	private int stonesPer;
+	
 	private int whoseTurn;
+	private boolean playersMancala;
+	private boolean prevMoveMancala;
 	private int prevUndoTurn;
 	private int undoCounter;
+	private boolean undoAfterMancala;
+	private int whoWon;
+	private boolean gameEnded;
 	
 	/**
 	 * Creates a MancalaModel. The board will be 2x7 with 2 mancalas and 12 pits. 
@@ -28,9 +36,14 @@ public class MancalaModel
 		board = new int[2][7]; //  2 mancalas and 12 pits
 		before = new int[2][7];
 		viewList = new ArrayList<>();
+		stonesPer = setUpNum;
 		whoseTurn = 0;
+		playersMancala = false;
+		prevMoveMancala = false;
 		prevUndoTurn = -1;
 		undoCounter = 0;
+		whoWon = 0;
+		gameEnded = false;
 		for(int i = 1; i < board[0].length; i++)
 		{
 			board[0][i] = setUpNum;
@@ -40,7 +53,6 @@ public class MancalaModel
 		}
 	}
 	
-	
 	/**
 	 * Returns the array containing the pits and mancalas.
 	 * @return an array of the board containing pits and mancalas
@@ -49,6 +61,36 @@ public class MancalaModel
 	{
 		return board;
 	}
+	/**
+	 * Resets the array and most of the class's instance variables to reset the MancalaModel to its setup state.
+	 */
+	public void resetBoard()
+	{
+		board[0][0] = 0;
+		board[1][0] = 0;
+		
+		for(int i = 1; i < board[0].length; i++)
+		{
+			board[0][i] = stonesPer;
+			board[1][i] = stonesPer;
+			before[0][i] = stonesPer;
+			before[1][i] = stonesPer;
+		}
+		
+		whoseTurn = 0;
+		prevMoveMancala = false;
+		prevUndoTurn = -1;
+		undoCounter = 0;
+		whoWon = 0;
+		gameEnded = false;
+		for(MancalaBoard board : viewList)
+		{
+			board.updateGraphics();
+		}
+	}
+	/**
+	 * Prints the MancalaBoard.
+	 */
 	public void printBoard()
 	{
 		for(int i = 0; i < board[1].length; i++)
@@ -62,8 +104,6 @@ public class MancalaModel
 		}
 		System.out.print(board[0][0]);
 	}
-	
-	
 	/**
 	 * Returns the number of stones within a specified pit or mancala.
 	 * Player A is 0, Player B is 1
@@ -80,13 +120,31 @@ public class MancalaModel
 		}
 		return board[player][pit];
 	}
-	
-	public int getBPits(int pitNum)
+	/**
+	 * Returns the number of stones in Player A's mancala.
+	 * @return the number of stones in mancala A
+	 */
+	public int getMancalaAStones()
+	{
+		return board[0][0];
+	}
+	/**
+	 * Returns the number of stones in Player B's mancala.
+	 * @return the number of stones in mancala B
+	 */
+	public int getMancalaBStones()
+	{
+		return board[1][0];
+	}
+	/**
+	 * Returns Player B's actual pit numbers since the pits are reversed in display.
+	 * @param pitNum
+	 * @return
+	 */
+	private int getBPits(int pitNum)
 	{
 		return 7 - pitNum;
 	}
-	
-	
 	
 	/**
 	 * Distributes counter-clockwise stones within the board array.
@@ -98,7 +156,7 @@ public class MancalaModel
 	 * @param player the current player's side number
 	 * @param startingPit the starting pit's number
 	 */
-	public boolean distribute(int player, int startingPit)
+	public void distribute(int player, int startingPit)
 	{
 		boolean isPlayerASide = true;
 		int pitToEmpty = startingPit;
@@ -122,7 +180,10 @@ public class MancalaModel
 			if(cPit > 6 || cPit == 0) // If cPit > 6, then cPit is supposedly current side's mancala. Put a stone into mancala.
 			{
 				board[cSide][0]++; // The mancala
-				endedInPlayer = true;
+				if(player == cSide)
+				{
+					endedInPlayer = true;
+				}
 				cPit = 1;
 				
 				if(isPlayerASide)
@@ -153,7 +214,7 @@ public class MancalaModel
 			}
 			stones--;			
 		}
-		return endedInPlayer;
+		playersMancala = endedInPlayer;
 	}
 	
 	
@@ -172,6 +233,11 @@ public class MancalaModel
 		return 0;
 	}
 	
+	/**
+	 * Captures the adjacent pits' stones.
+	 * @param sideNum the side the last stone is put into.
+	 * @param pitNum the pit number the last stone is put into.
+	 */
 	private void acrossCapture(int sideNum, int pitNum)
 	{
 		int otherSide = changeSide(sideNum);
@@ -181,8 +247,8 @@ public class MancalaModel
 	
 	
 	/**
-	 * Attaches listeners to model.
-	 * @param cl the ChangeListener
+	 * Attaches views to model.
+	 * @param the view to attach
 	 */
 	public void attach(MancalaBoard board)
 	{
@@ -196,9 +262,9 @@ public class MancalaModel
 	 * @param player the player's number
 	 * @param pit the pit number
 	 */
-	public boolean update(int player, int pit)
+	public void update(int player, int pit)
 	{
-		if(whoseTurn == player && getStonesOf(player, pit) != 0)
+		if(whoseTurn == player && getStonesOf(player, pit) != 0 )
 		{
 			if(prevUndoTurn == whoseTurn)
 			{
@@ -206,10 +272,24 @@ public class MancalaModel
 			}
 			setStateOfBoard(before, board);
 			
-			boolean playersMancala = distribute(player, pit); 
+			if(undoAfterMancala && undoCounter > 2 && prevMoveMancala)
+			{
+				System.out.println("**");
+				undoCounter = 0;
+			}
+			
+			undoAfterMancala = false;
+			prevMoveMancala = false;
+			
+			distribute(player, pit); 
 			if(!playersMancala)
 			{
 				whoseTurn = changeSide(whoseTurn);
+			}
+			else
+			{
+				undoAfterMancala = true;
+				prevMoveMancala = true;
 			}
 		
 			for(MancalaBoard board : viewList)
@@ -217,26 +297,50 @@ public class MancalaModel
 				board.updateGraphics();
 			}
 		}
-		if(hasGameEnded())
+		
+		hasGameEnded();
+		if(gameEnded)
 		{
+			int mancalaA = board[0][0];
+			int mancalaB = board[1][0];
+			
+			if(mancalaA > mancalaB)
+			{
+				whoWon = 0;
+			}
+			else if(mancalaB > mancalaA)
+			{
+				whoWon = 1;
+			}
+			else
+			{
+				whoWon = -1;
+			}
 			for(MancalaBoard board : viewList)
 			{
 				board.updateGraphics();
 			}
-			return true;
 		}
-		return false;
 	}
-	
-	
 	/**
 	 * Resets the board to previous state before last change.
 	 */
 	public void undo()
 	{
-		if(undoCounter < 3)
+		if(undoAfterMancala && undoCounter < 3 )
 		{
 			undoCounter++;
+			prevMoveMancala = false;
+			setStateOfBoard(board, before);
+			for(MancalaBoard board : viewList)
+			{
+				board.updateGraphics();
+			}
+		}
+		else if(undoCounter < 3 )
+		{
+			undoCounter++;
+			prevMoveMancala = false;
 			prevUndoTurn = whoseTurn;
 			whoseTurn = changeSide(whoseTurn);
 			setStateOfBoard(board, before);
@@ -246,8 +350,12 @@ public class MancalaModel
 			}
 		}
 	}
-	
-	public void setStateOfBoard(int[][] boardSetAs, int[][] boardToBe)
+	/**
+	 * A helper method to set a the state of one 2-D array or board to another specified board or 2-D array.
+	 * @param boardSetAs the board to set
+	 * @param boardToBe the board to be set as
+	 */
+	private void setStateOfBoard(int[][] boardSetAs, int[][] boardToBe)
 	{
 		for(int i = 0; i < boardSetAs.length; i++)
 		{
@@ -257,9 +365,11 @@ public class MancalaModel
 			}
 		}
 	}
-	public boolean hasGameEnded()
+	/**
+	 * Checks and handles if a game is over.
+	 */
+	private void hasGameEnded()
 	{
-		boolean isEnded = false;
 		boolean sideAEmpty = true;
 		boolean sideBEmpty = true;
 		for(int i = 1; i < board[0].length; i++) //Player A 1-6
@@ -273,7 +383,7 @@ public class MancalaModel
 		{
 			//then Player A's side is empty, so Player's B pits empty to his/her mancala.
 			endCapture(1);
-			isEnded = true;
+			gameEnded = true;
 		}
 		else
 		{
@@ -288,13 +398,14 @@ public class MancalaModel
 			{
 				//then Player B's side is empty, so Player's A pits empty to his/her mancala.
 				endCapture(0);
-				isEnded = true;
+				gameEnded = true;
 			}
 		}
-		return isEnded;
 	}
-	
-	
+	/**
+	 * Captures all stones from a player's row to player's mancala if the other player's row is completely empty.
+	 * @param player the player's rows to empty
+	 */
 	private void endCapture(int player)
 	{
 		for(int i = 1; i < board[player].length; i++)
@@ -302,5 +413,21 @@ public class MancalaModel
 			board[player][0] += board[player][i]; //Player's mancala
 			board[player][i] = 0;
 		}
+	}
+	/**
+	 * Returns true if the game is over; otherwise, false.
+	 * @return true if game is over; otherwise, false
+	 */
+	public boolean isGameOver()
+	{
+		return gameEnded;
+	}
+	/** 
+	 * Returns the player's number who won the game.
+	 * @return the number of the player who won
+	 */
+	public int getWinner()
+	{
+		return whoWon;
 	}
 }

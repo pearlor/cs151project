@@ -3,15 +3,32 @@ import java.awt.event.*;
 import java.io.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-
+/**
+ * This class contains the View and Controller portions of MVC pattern.
+ * 
+ * The view is responsible for the appearance of the program.
+ * 
+ * There is also the Controller.
+ * They are the ActionListeners in this class. They call the mutators of the CalendarModel.
+ * 
+ * @authors Ann Le, Ha Nguyen, Pearl Or
+ *
+ * Class creates a MancalaBoard.
+ * MancalaBoard is responsible for the visual and event handling aspects of the mancala game.
+ */
 public class MancalaBoard extends JFrame 
 {
-	
 	private MancalaModel model;
 	private MancalaLayoutManager layout;
 	private int width;
 	private int height;
-	
+	/**
+	 * 
+	 * @param mancala
+	 * @param newLayout
+	 * @param w
+	 * @param h
+	 */
 	public MancalaBoard(MancalaModel mancala, MancalaLayoutManager newLayout, int w, int h) 
 	{
 		model = mancala;
@@ -20,16 +37,21 @@ public class MancalaBoard extends JFrame
 		height = h;
 		this.updateGraphics();
 	}
-	
+	/**
+	 * Sets the layout of the MancalaBoard.
+	 * @param newLayout the MancalaLayoutManager to set as
+	 */
 	public void setLayout(MancalaLayoutManager newLayout) 
 	{
 		layout = newLayout;
 		this.updateGraphics();
 	}
-
+	/**
+	 * Updates the display of the MancalaBoard.
+	 */
 	public void updateGraphics()
 	{
-		this.getContentPane().removeAll();;
+		this.getContentPane().removeAll();
 		
 		int[][] board = model.getBoard();
 		
@@ -41,8 +63,7 @@ public class MancalaBoard extends JFrame
 		this.setTitle("Mancala Game");
 		this.setLayout(new BorderLayout());
 		this.setPreferredSize(new Dimension(width, height));
-		
-		
+
 		//North panel
 		JPanel north = new JPanel();
 		north.setMaximumSize(new Dimension(width, UNIT_HEIGHT));
@@ -123,7 +144,7 @@ public class MancalaBoard extends JFrame
 		JLabel playerBLabel = new JLabel("PLAYER B");
 		playerBLabel.setPreferredSize(new Dimension(width, UNIT_HEIGHT));
 		playerBLabel.setHorizontalAlignment(JLabel.CENTER);
-		layout.decoratePlayerLable(playerBLabel);
+		layout.decoratePlayerLabel(playerBLabel);
 		
 		north.add(playerBLabel, BorderLayout.CENTER);
 		
@@ -135,7 +156,7 @@ public class MancalaBoard extends JFrame
 		JLabel playerALabel = new JLabel("PLAYER A");
 		playerALabel.setPreferredSize(new Dimension(width, UNIT_HEIGHT));
 		playerALabel.setHorizontalAlignment(JLabel.CENTER);
-		layout.decoratePlayerLable(playerALabel);
+		layout.decoratePlayerLabel(playerALabel);
 		this.add(playerALabel, BorderLayout.SOUTH);
 		
 
@@ -182,6 +203,7 @@ public class MancalaBoard extends JFrame
 				}
 			});
 			layout.decorateStone(pit);
+			layout.decoratePit(pit);
 			pitButtonPanel.add(pit);
 		}
 		
@@ -226,6 +248,7 @@ public class MancalaBoard extends JFrame
 				}
 			});
 			layout.decorateStone(pit);
+			layout.decoratePit(pit);
 			pitButtonPanel.add(pit);
 		}
 		
@@ -239,6 +262,7 @@ public class MancalaBoard extends JFrame
 		MancalaComponent mancalaLeft = new MancalaComponent(board[1][0], 20, 40);
 		mancalaLeft.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8));
 		layout.decorateStone(mancalaLeft);
+		layout.decoratePit(mancalaLeft);
 		this.add(mancalaLeft, BorderLayout.WEST);
 		
 		
@@ -246,6 +270,43 @@ public class MancalaBoard extends JFrame
 		MancalaComponent mancalaRight = new MancalaComponent(board[0][0], 0, 40);
 		mancalaRight.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8));
 		layout.decorateStone(mancalaRight);
+		layout.decoratePit(mancalaRight);
+		
+		if(model.isGameOver())
+		{	
+		   	
+			Object[] options = {"Reset Game", "Close Game"};
+			String winnerMsg = "won!";
+			int winner = model.getWinner();
+			if(winner == 0)
+			{
+				winnerMsg = "Player A " + winnerMsg;
+			}
+			else if(winner == 1)
+			{
+				winnerMsg = "Player B " + winnerMsg;
+			}
+			else
+			{
+				winnerMsg = "It's a Draw!";
+			}
+			
+			winnerMsg += "\nPlayer A's Mancala has: " + model.getMancalaAStones() + " stones!" + "\nPlayer B's Mancala has: " + model.getMancalaBStones() + " stones!";
+			//setVisible(true);
+			
+			
+			int n = JOptionPane.showOptionDialog(null, winnerMsg, "Play Again?", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+			if(n == 0) //Reset Game
+			{
+				model.resetBoard();
+			}
+			else
+			{
+				System.exit(0);
+			}
+		
+		}
+		
 		this.add(mancalaRight, BorderLayout.EAST);
 		
 		this.setVisible(true);
