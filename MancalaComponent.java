@@ -1,70 +1,58 @@
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
-
+import java.awt.geom.*;
 import javax.swing.JComponent;
+
 /**
- * 
- * @authors Ann Le, Ha Nguyen, Pearl Or
- *
- * A MancalaComponent to display a mancala and its stones for a mancala game display- specifically the MancalaBoard.
- *
+ * The MancalaComponent class displays the mancala in the Mancala Game.
+ * @author Ann Le, Ha Nguyen, Pearl Or (Team Infinity)
  */
 public class MancalaComponent extends JComponent implements BoardComponent {
 	private int count;
 	private int xpit;
 	private int ypit;
 	private Color color;
-	private boolean isRound;
+	
 	/**
-	 * Creates a MancalaComponent.
-	 * @param num the number of stones in MancalaComponent
-	 * @param xcomp the x-coordinates of where stones should be drawn.
-	 * @param ycomp the x-coordinates of where stones should be drawn.
+	 * To construct a MancalaComponent with specific number of stones, the x and y components of the left top corner.
+	 * @param num: number of stones
+	 * @param xcomp: x-component of the left top corner
+	 * @param ycomp: y-component of the right top corner
 	 */
-	public MancalaComponent(int num, int xcomp, int ycomp) 
-	{
+	public MancalaComponent(int num, int xcomp, int ycomp) {
 		count = num;
 		xpit = xcomp;
 		ypit = ycomp;
 	}
+	
+	
+	@Override
 	/**
-	 * Sets the color of a MancalaComponent.
-	 * @param newColor the color to set MancalaComponent as
+	 * To set the color of the stones
+	 * @param newColor: the color of the stones
 	 */
-	public void setColor(Color newColor) 
-	{
+	public void setColor(Color newColor) {
 		color = newColor;
 	}
+	
+
+	@Override
 	/**
-	 * Sets if a MancalaComponent should be round or not. If true, then the MancalaComponet will be round; otherwise, rectangular.
-	 * @param haveRoundPits is true if should be round; otherwise false
+	 * The mancala is designed to always be in the ellipse shape. This method is a dummy method (no expected outcome).
 	 */
-	public void setRoundPit(boolean haveRoundPits)
-	{
-		isRound = haveRoundPits;
+	public void setRoundPit(boolean check) {
+		//No need for implementation. Mancala is designed to always be round.
 	}
-	/**
-	 * Paints the MancalaComponent.
-	 * @param g the Graphics
-	 */	
-	public void paintComponent(Graphics g) 
-	{
+	
+	@Override
+	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		
 		//Draw Mancala
 		g2.setColor(Color.WHITE);
-		Shape mancala = null;
-		if(!isRound)
-		{
-			mancala = new Rectangle2D.Double(xpit, ypit, this.getWidth() - 40, this.getHeight() - 100);
-		}
-		else
-		{
-			mancala = new Ellipse2D.Double(xpit, ypit, this.getWidth() - 40, this.getHeight() - 100);
-		}
-		g2.fill(mancala);
+		
+		//Always draw ellipse for Mancala
+		g2.fill(new Ellipse2D.Double(xpit, ypit, this.getWidth() - 40, this.getHeight() - 100));
 		
 		//Draw the stones
 		g2.setColor(color);
@@ -72,20 +60,16 @@ public class MancalaComponent extends JComponent implements BoardComponent {
 		int y = ypit + 70;
 		int num = 1;
 		
-		for (int i = 1; i <= count; i++) 
-		{
-			if (num <= 6) 
-			{
-				g2.fill(new Ellipse2D.Double(x, y, 20, 20));
-				x +=22;
-				num++;
-			}
-			if(num > 6)
-			{
+		for (int i = 1; i <= count; i++) {
+			if (num > 6) {		//If there are enough stones in one row, move to the next row
 				x = xpit + 25;
 				y += 22;
 				num = 1;
 			}
+			//Draw the stone
+			g2.fill(new Ellipse2D.Double(x, y, 20, 20));
+			x += 22;
+			num++;
 		}
 	}
 }

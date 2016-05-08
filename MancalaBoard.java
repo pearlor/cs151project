@@ -1,60 +1,53 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
-import javax.imageio.ImageIO;
 import javax.swing.*;
+
 /**
- * This class contains the View and Controller portions of MVC pattern.
- * 
- * The view is responsible for the appearance of the program.
- * 
- * There is also the Controller.
- * They are the ActionListeners in this class. They call the mutators of the CalendarModel.
- * 
- * @authors Ann Le, Ha Nguyen, Pearl Or
- *
- * Class creates a MancalaBoard.
- * MancalaBoard is responsible for the visual and event handling aspects of the mancala game.
+ * The MancalaBoard class contains the View and Controller components of MVC pattern.
+ * This class is responsible for the visual presentation and action of the Mancala game.
+ * @authors Ann Le, Ha Nguyen, Pearl Or (Team Infinity)
  */
-public class MancalaBoard extends JFrame 
-{
+public class MancalaBoard extends JFrame {
+	
 	private MancalaModel model;
 	private MancalaLayoutManager layout;
 	private int width;
 	private int height;
+	
 	/**
-	 * 
-	 * @param mancala
-	 * @param newLayout
-	 * @param w
-	 * @param h
+	 * To construct a MancalaBoard object with a specific model, layout, width and height.
+	 * @param mancala: model of the Mancala game
+	 * @param newLayout: design layout 
+	 * @param w: width of the frame
+	 * @param h: height of the frame
 	 */
-	public MancalaBoard(MancalaModel mancala, MancalaLayoutManager newLayout, int w, int h) 
-	{
+	public MancalaBoard(MancalaModel mancala, MancalaLayoutManager newLayout, int w, int h) {
 		model = mancala;
 		layout = newLayout;
 		width = w;
 		height = h;
-		this.updateGraphics();
+		this.updateGraphics(false);
 	}
+	
 	/**
-	 * Sets the layout of the MancalaBoard.
-	 * @param newLayout the MancalaLayoutManager to set as
+	 * To set a new layout for the MancalaBoard.
+	 * @param newLayout: new layout
 	 */
-	public void setLayout(MancalaLayoutManager newLayout) 
-	{
+	public void setLayout(MancalaLayoutManager newLayout) {
 		layout = newLayout;
-		this.updateGraphics();
+		this.updateGraphics(false);
 	}
+
 	/**
-	 * Updates the display of the MancalaBoard.
+	 * To update the presentation of the MancalaBoard.
+	 * @param check: true if the game has ended, false otherwise.
 	 */
-	public void updateGraphics()
-	{
-		this.getContentPane().removeAll();
+	public void updateGraphics(boolean check){
+		this.getContentPane().removeAll();;
 		
 		int[][] board = model.getBoard();
 		
+		//Decorate background for the MancalaBoard
 		layout.decorateBackground(this);
 		
 		final int UNIT_WIDTH = width/11;
@@ -63,14 +56,15 @@ public class MancalaBoard extends JFrame
 		this.setTitle("Mancala Game");
 		this.setLayout(new BorderLayout());
 		this.setPreferredSize(new Dimension(width, height));
-
+		
+		
 		//North panel
 		JPanel north = new JPanel();
 		north.setMaximumSize(new Dimension(width, UNIT_HEIGHT));
 		north.setLayout(new BorderLayout());
 		north.setOpaque(false);
 		
-		//Top panel contains all the setting buttons
+		//Top panel contains SETTING and UNDO buttons
 		JPanel top = new JPanel();
 		top.setOpaque(false);
 		top.setLayout(new FlowLayout());
@@ -79,26 +73,25 @@ public class MancalaBoard extends JFrame
 		layoutButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JFrame setting = new JFrame();
-				setting.setLocationRelativeTo(MancalaBoard.this);
+				JFrame settingWindow = new JFrame();
+				settingWindow.setTitle("Setting");
+				settingWindow.setLocationRelativeTo(MancalaBoard.this);
 				
-				JLabel question2 = new JLabel("Select a style board design:");
-				question2.setAlignmentX(JLabel.CENTER);
-				question2.setOpaque(false);
-				setting.add(question2, BorderLayout.NORTH);
+				JLabel question = new JLabel("Select a style board design:");
+				question.setAlignmentX(JLabel.CENTER);
+				settingWindow.add(question, BorderLayout.NORTH);
 				    
-				JPanel questionPanel2 = new JPanel();
-				questionPanel2.setOpaque(false);
-				questionPanel2.setLayout(new FlowLayout());
+				JPanel questionPanel = new JPanel();
+				questionPanel.setLayout(new FlowLayout());
 				   
 				final JRadioButton styleA = new JRadioButton("Classic Layout");
 				final JRadioButton styleB = new JRadioButton("Modern Layout");
 				   
-				questionPanel2.add(styleA);
-				questionPanel2.add(styleB);
-				setting.add(questionPanel2, BorderLayout.CENTER);
+				questionPanel.add(styleA);
+				questionPanel.add(styleB);
+				settingWindow.add(questionPanel, BorderLayout.CENTER);
 				
-				final ButtonGroup group = new ButtonGroup();
+				ButtonGroup group = new ButtonGroup();
 				group.add(styleA);
 				group.add(styleB);
 				
@@ -113,50 +106,90 @@ public class MancalaBoard extends JFrame
 							   newLayout = new ModernLayout();
 							setLayout(newLayout);
 						}
-						setting.dispose();
+						settingWindow.dispose();
 					}
 				});
 				
 				JPanel buttonPanel = new JPanel();
 				buttonPanel.add(button);
 				
-				setting.add(buttonPanel, BorderLayout.SOUTH);
-				setting.pack();
-				setting.setVisible(true);
+				settingWindow.add(buttonPanel, BorderLayout.SOUTH);
+				settingWindow.pack();
+				settingWindow.setVisible(true);
 			}
 		});
+		
+		//Add the SETTING button to the top panel
 		top.add(layoutButton);
 		
 		JButton undoButton = new JButton("UNDO");
-		undoButton.addActionListener(new ActionListener() 
-		{
+		undoButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				model.undo();
+			public void actionPerformed(ActionEvent e) {
+				//WARNING window
+				if (model.getUndoCounter() > 2) {
+					JFrame warningWindow = new JFrame("Error");
+					warningWindow.setSize(400, 100);
+					
+					JLabel message = new JLabel();
+					message.setText("You have already used UNDO button 3 times for this turn.");
+					message.setHorizontalAlignment(JLabel.CENTER);
+					warningWindow.add(message);
+					
+					warningWindow.setVisible(true);
+					warningWindow.setLocationRelativeTo(null);
+					warningWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				}
+				else if (!model.hasClickedPit()) {
+					JFrame warningWindow = new JFrame("Error");
+					warningWindow.setSize(300, 100);
+					
+					JLabel message = new JLabel();
+					message.setText("<html>You already clicked the UNDO button.<br>Please select a pit in your side of the board!</html>");
+					message.setHorizontalAlignment(JLabel.CENTER);
+					warningWindow.add(message);
+					
+					warningWindow.setVisible(true);
+					warningWindow.setLocationRelativeTo(null);
+					warningWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				}
+				else model.undo();
 			}
 		});
+		
+		//Add the UNDO button to the top panel
 		top.add(undoButton);
 		
+		//Add the top panel to the North panel
 		north.add(top, BorderLayout.NORTH);
 		
-		//PlayerB name
+		//PlayerB name label
 		JLabel playerBLabel = new JLabel("PLAYER B");
 		playerBLabel.setPreferredSize(new Dimension(width, UNIT_HEIGHT));
 		playerBLabel.setHorizontalAlignment(JLabel.CENTER);
-		layout.decoratePlayerLabel(playerBLabel);
+		layout.decoratePlayerLable(playerBLabel);
 		
+		//Check if this is Player B's turn. Change text color to Red if this is Player B's turn.
+		if (model.getWhoseTurn() == 1)
+			playerBLabel.setForeground(Color.RED);
+		
+		//Add PlayerB's name label to the North panel
 		north.add(playerBLabel, BorderLayout.CENTER);
 		
-		//Add North panel to the JFrame
+		//Add North panel to the MancalaBoard (JFrame)
 		this.add(north, BorderLayout.NORTH);
 		
 		
-		//PlayerA name
+		//PlayerA name label
 		JLabel playerALabel = new JLabel("PLAYER A");
 		playerALabel.setPreferredSize(new Dimension(width, UNIT_HEIGHT));
 		playerALabel.setHorizontalAlignment(JLabel.CENTER);
-		layout.decoratePlayerLabel(playerALabel);
+		layout.decoratePlayerLable(playerALabel);
+		//Check if this is Player A's turn
+				if (model.getWhoseTurn() == 0)
+					playerALabel.setForeground(Color.RED);
+				
+		//Add PlayerA's name label to MancalaBoard (JFrame)
 		this.add(playerALabel, BorderLayout.SOUTH);
 		
 
@@ -180,12 +213,10 @@ public class MancalaBoard extends JFrame
 		pitButtonPanel.setBorder(BorderFactory.createEmptyBorder());
 		pitButtonPanel.setLayout(new FlowLayout());
 		
-		for (int i = 1; i <= 6; i++) 
-		{
+		for (int i = 1; i <= 6; i++) {
 			//Create the label
 			JLabel pitLabel = new JLabel("B" + (7 - i));
 			pitLabel.setPreferredSize(new Dimension(UNIT_WIDTH, 20));
-			pitLabel.setFont(new Font("Arial", Font.BOLD, 16));
 			pitLabel.setHorizontalAlignment(JLabel.CENTER);
 			layout.decoratePitLabel(pitLabel);
 			namePanel.add(pitLabel);
@@ -195,14 +226,12 @@ public class MancalaBoard extends JFrame
 			PitButton pit = new PitButton(board[1][i]);
 			
 			pit.setPreferredSize(new Dimension(UNIT_WIDTH, UNIT_HEIGHT*4 - 70));
-			pit.addMouseListener(new MouseAdapter() 
-			{
-				public void mouseClicked(MouseEvent e) 
-				{
-					model.update(1, (7-temp)); //since A's is reversed the selection needs to be reverted
+			pit.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if (model.getWhoseTurn() == 1)
+						model.update(1, 7 - temp);
 				}
 			});
-			layout.decorateStone(pit);
 			layout.decoratePit(pit);
 			pitButtonPanel.add(pit);
 		}
@@ -225,12 +254,10 @@ public class MancalaBoard extends JFrame
 		pitButtonPanel.setBorder(BorderFactory.createEmptyBorder());
 		pitButtonPanel.setLayout(new FlowLayout());
 		
-		for (int i = 1; i <= 6; i++) 
-		{
+		for (int i = 1; i <= 6; i++) {
 			//Create the label
 			JLabel pitLabel = new JLabel("A" + i);
 			pitLabel.setPreferredSize(new Dimension(UNIT_WIDTH, 20));
-			pitLabel.setFont(new Font("Arial", Font.BOLD, 16));
 			pitLabel.setHorizontalAlignment(JLabel.CENTER);
 			layout.decoratePitLabel(pitLabel);
 			namePanel.add(pitLabel);
@@ -240,14 +267,12 @@ public class MancalaBoard extends JFrame
 			PitButton pit = new PitButton(board[0][i]);
 			
 			pit.setPreferredSize(new Dimension(UNIT_WIDTH, UNIT_HEIGHT*4 - 70));
-			pit.addMouseListener(new MouseAdapter() 
-			{
-				public void mouseClicked(MouseEvent e) 
-				{
-					model.update(0, temp);
+			pit.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if (model.getWhoseTurn() == 0)
+						model.update(0, temp);
 				}
 			});
-			layout.decorateStone(pit);
 			layout.decoratePit(pit);
 			pitButtonPanel.add(pit);
 		}
@@ -259,60 +284,122 @@ public class MancalaBoard extends JFrame
 		
 		
 		//Left Mancala
-		MancalaComponent mancalaLeft = new MancalaComponent(board[1][0], 20, 40);
-		mancalaLeft.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8));
-		layout.decorateStone(mancalaLeft);
+		JPanel leftPanel = new JPanel();
+		leftPanel.setOpaque(false);
+		leftPanel.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8));
+		
+		JLabel mancalaLabelB = new JLabel("MANCALA B");
+		mancalaLabelB.setOpaque(false);
+		mancalaLabelB.setPreferredSize(new Dimension(UNIT_WIDTH*2, 30));
+		mancalaLabelB.setHorizontalAlignment(JLabel.CENTER);
+		layout.decoratePitLabel(mancalaLabelB);
+		leftPanel.add(mancalaLabelB);
+		
+		MancalaComponent mancalaLeft = new MancalaComponent(board[1][0], 20, 20);
+		mancalaLeft.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8 - 35));
 		layout.decoratePit(mancalaLeft);
-		this.add(mancalaLeft, BorderLayout.WEST);
+		leftPanel.add(mancalaLeft);
+		
+		//Add the left panel to JFrame (MancalaBoard)
+		this.add(leftPanel, BorderLayout.WEST);
 		
 		
 		//Right Mancala
-		MancalaComponent mancalaRight = new MancalaComponent(board[0][0], 0, 40);
-		mancalaRight.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8));
-		layout.decorateStone(mancalaRight);
+		JPanel rightPanel = new JPanel();
+		rightPanel.setOpaque(false);
+		rightPanel.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8));
+		
+		JLabel mancalaLabelA = new JLabel("MANCALA A");
+		mancalaLabelA.setOpaque(false);
+		mancalaLabelA.setPreferredSize(new Dimension(UNIT_WIDTH*2, 30));
+		mancalaLabelA.setHorizontalAlignment(JLabel.CENTER);
+		layout.decoratePitLabel(mancalaLabelA);
+		rightPanel.add(mancalaLabelA);
+		
+		MancalaComponent mancalaRight = new MancalaComponent(board[0][0], 0, 20);
+		mancalaRight.setPreferredSize(new Dimension(UNIT_WIDTH*2, UNIT_HEIGHT*8 - 35));
 		layout.decoratePit(mancalaRight);
+		rightPanel.add(mancalaRight);
 		
-		if(model.isGameOver())
-		{	
-		   	
-			Object[] options = {"Reset Game", "Close Game"};
-			String winnerMsg = "won!";
-			int winner = model.getWinner();
-			if(winner == 0)
-			{
-				winnerMsg = "Player A " + winnerMsg;
-			}
-			else if(winner == 1)
-			{
-				winnerMsg = "Player B " + winnerMsg;
-			}
-			else
-			{
-				winnerMsg = "It's a Draw!";
-			}
-			
-			winnerMsg += "\nPlayer A's Mancala has: " + model.getMancalaAStones() + " stones!" + "\nPlayer B's Mancala has: " + model.getMancalaBStones() + " stones!";
-			//setVisible(true);
-			
-			
-			int n = JOptionPane.showOptionDialog(null, winnerMsg, "Play Again?", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
-			if(n == 0) //Reset Game
-			{
-				model.resetBoard();
-			}
-			else
-			{
-				System.exit(0);
-			}
+		//Add the right panel to JFrame (MancalaBoard)
+		this.add(rightPanel, BorderLayout.EAST);
 		
-		}
-		
-		this.add(mancalaRight, BorderLayout.EAST);
 		
 		this.setVisible(true);
 		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setResizable(false);
+		
+		//If the game has ended, display the WINNER and give user the 2 options: Play again or Quit
+		if (check)
+		{	
+			JFrame winnerNotify = new JFrame("The Winner is Here!");
+			winnerNotify.setSize(450, 150);
+			winnerNotify.setLocationRelativeTo(null);
+			
+			String message = "";
+			//Get the winner
+			int winner = model.getWinner();
+			if (winner == 0)
+				message = "Player A won!";
+			else if (winner == 1)
+				message = "Player B won!";
+			else
+				message= "It's a draw!";
+			
+			JLabel winnerLabel = new JLabel();
+			winnerLabel.setText(message);
+			winnerLabel.setHorizontalAlignment(JLabel.CENTER);
+			winnerLabel.setFont(new Font("Arial", Font.BOLD, 30));
+			winnerLabel.setForeground(Color.RED);
+			
+			//Add the message to the frame
+			winnerNotify.add(winnerLabel, BorderLayout.NORTH);
+		
+			//Add more information
+			String detailMessage = "Player A's Mancala has: " + model.getMancalaStones(0) + " stones!   "
+					+ "Player B's Mancala has: " + model.getMancalaStones(1) + " stones!";
+			JLabel detailLabel = new JLabel();
+			detailLabel.setText(detailMessage);
+			detailLabel.setHorizontalAlignment(JLabel.CENTER);
+			
+			//Add the detail information to the frame
+			winnerNotify.add(detailLabel, BorderLayout.CENTER);
+			
+			//Give options
+			JPanel optionPanel = new JPanel();
+			optionPanel.setLayout(new FlowLayout());
+			   
+			//This button is to restart the game. MancalaOptionMenu displays. All other windows are disposed.
+			JButton reStartButton = new JButton("Play Again!");
+			reStartButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+					winnerNotify.dispose();
+					MancalaOptionMenu menu = new MancalaOptionMenu();
+				}
+			});
+			
+			//This button is to quit the game. Program is terminated.
+			JButton quitButton = new JButton("QUIT");
+			quitButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.exit(0);
+				}
+			});
+			   
+			optionPanel.add(reStartButton);
+			optionPanel.add(quitButton);
+			
+			//Add the options to the frame
+			winnerNotify.add(optionPanel, BorderLayout.SOUTH);			
+			
+			winnerNotify.setVisible(true);
+		}
+		
 		this.revalidate();
 		this.repaint();
 	}

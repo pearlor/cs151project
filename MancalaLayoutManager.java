@@ -1,36 +1,32 @@
 import javax.swing.*;
+
 /**
- * 
- * @authors Ann Le, Ha Nguyen, Pearl Or
- *
- * This interface contains 4 abstract methods that must be implemented by classes that have an IS-A relationship to MancalaLayoutManagers.
- *
+ * The MancalaLayoutManager interface sets requirements for a layout class designed for the MancalaBoard class.
+ * @author Ann Le, Ha Nguyen, Pearl Or (Team Infinity)
  */
-public interface MancalaLayoutManager 
-{
+public interface MancalaLayoutManager {
+	
 	/**
-	 * Decorate the stones of the specified BoardComponent.
-	 * @param pit the BoardComponent to be decorated.
-	 */
-	public void decorateStone(BoardComponent pit);
-	/**
-	 * Decorate the pit style of the specified BoardComponent.
-	 * @param pit
+	 * To decorate the BoardComponent of the MancalaBoard.
+	 * @param pit: the BoardComponent to be decorated
 	 */
 	public void decoratePit(BoardComponent pit);
+	
 	/**
-	 * Decorate a player's label.
-	 * @param label the JLabel to be decorated
+	 * To decorate the player's name label
+	 * @param label: the label to be decorated
 	 */
-	public void decoratePlayerLabel(JLabel label);
+	public void decoratePlayerLable(JLabel label);
+	
 	/**
-	 * Decorate a JFrame's background.
-	 * @param frame the JFrame to be decorated
+	 * To set the background of the JFrame (MancalaBoard).
+	 * @param frame: the JFrame to be decorated
 	 */
 	public void decorateBackground(JFrame frame);
+	
 	/**
-	 * Decorate a pit's label.
-	 * @param label the JLabel to be decorated.
+	 * To decorate the pit's name label
+	 * @param label: the label to be decorated
 	 */
 	public void decoratePitLabel(JLabel label);
 }

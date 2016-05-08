@@ -1,42 +1,31 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-/**
- * 
- * @authors Ann Le, Ha Nguyen, Pearl Or
- *
- * This class displays the menu screen that lists
- * the options for the user to select before starting a mancala game.
- * After user input, this class creates the MancalaModel and MancalaBoard for the actual game.
- *
- */
-public class MancalaOptionMenu extends JFrame 
-{  
+
+ /**
+  * The MancalaOptionMenu class displays a menu for the user to select the number of stones per pit and the design layout before starting the game.
+  * After the user clicks the "Let's start" button, the Mancala Game is started.
+  * @author Ann Le, Ha Nguyen, Pearl Or (Team Infinity)
+  */
+public class MancalaOptionMenu extends JFrame {
+   
 	/**
-	 * Creates a MancalaOptionMenu.
+	 * To construct a MancalaOptionMenu object.
 	 */
-   public MancalaOptionMenu()
-   {
-	   /*
-	   JLabel background = new JLabel(new ImageIcon(Toolkit.getDefaultToolkit().createImage("menu.png")));
-	   this.setContentPane(background);
-	   */
-	   
+	public MancalaOptionMenu(){
 	   this.setTitle("Mancala Game");
 	   this.setSize(new Dimension(500, 200));
+	   this.setLocationRelativeTo(null);
 	   
 	   //Panel for the first question
 	   JPanel part1 = new JPanel();
-	   part1.setOpaque(false);
 	   part1.setLayout(new BorderLayout());
 
 	   JLabel question1 = new JLabel("Select number of stones per pit:");
 	   question1.setAlignmentX(JLabel.CENTER);
-	   question1.setOpaque(false);
 	   part1.add(question1, BorderLayout.NORTH);
 	   
 	   JPanel questionPanel1 = new JPanel();
-	   questionPanel1.setOpaque(false);
 	   questionPanel1.setLayout(new FlowLayout());
 	   
 	   final JRadioButton stones3 = new JRadioButton("3 stones");
@@ -46,7 +35,7 @@ public class MancalaOptionMenu extends JFrame
 	   questionPanel1.add(stones4);
 	   part1.add(questionPanel1, BorderLayout.CENTER);
 	   
-	   final ButtonGroup group1 = new ButtonGroup();
+	   ButtonGroup group1 = new ButtonGroup();
 	   group1.add(stones3);
 	   group1.add(stones4);
 	   
@@ -56,16 +45,13 @@ public class MancalaOptionMenu extends JFrame
 	   
 	   //Panel for the second question
 	   JPanel part2 = new JPanel();
-	   part2.setOpaque(false);
 	   part2.setLayout(new BorderLayout());
 	   
 	   JLabel question2 = new JLabel("Select a design for the board:");
 	   question2.setAlignmentX(JLabel.CENTER);
-	   question2.setOpaque(false);
 	   part2.add(question2, BorderLayout.NORTH);
 	    
 	   JPanel questionPanel2 = new JPanel();
-	   questionPanel2.setOpaque(false);
 	   questionPanel2.setLayout(new FlowLayout());
 	   
 	   final JRadioButton styleA = new JRadioButton("Classic Layout");
@@ -75,7 +61,7 @@ public class MancalaOptionMenu extends JFrame
 	   questionPanel2.add(styleB);
 	   part2.add(questionPanel2, BorderLayout.CENTER);
 	   
-	   final ButtonGroup group2 = new ButtonGroup();
+	   ButtonGroup group2 = new ButtonGroup();
 	   group2.add(styleA);
 	   group2.add(styleB);
 	   
@@ -84,7 +70,6 @@ public class MancalaOptionMenu extends JFrame
 	   
 	   //The START button
 	   JPanel bottomPanel = new JPanel();
-	   bottomPanel.setOpaque(false);
 	   
 	   JButton startButton = new JButton("Let's START!!!");
 	   startButton.addActionListener(new ActionListener() {
@@ -108,13 +93,11 @@ public class MancalaOptionMenu extends JFrame
 				   
 				   //Attach the model to the view and controller component
 				   model.attach(board);
-					
 				   
 				   //Close the menu window
 				   dispose();
 			   }
-			   else 
-			   {
+			   else {
 				   JFrame errorMessage = new JFrame();
 				   errorMessage.setTitle("Error");
 				   errorMessage.setSize(450, 100);
